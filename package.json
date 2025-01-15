@@ -1,0 +1,22 @@
+{
+  "name": "turbin3-vault",
+  "module": "mod.ts",
+  "type": "module",
+  "scripts": {
+    "lint:fix": "biome lint --unsafe --error-on-warnings ./tests",
+    "lint": "biome lint --error-on-warnings .",
+    "test": "vitest --dir ./tests"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "vitest": "^2.1.8"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@solana-program/system": "0.6.2",
+    "@solana/web3.js": "^1.98.0"
+  }
+}
