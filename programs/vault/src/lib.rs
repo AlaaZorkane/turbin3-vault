@@ -29,13 +29,13 @@ pub mod vault {
         _withdraw(ctx, input)
     }
 
-    pub fn deposit_spl(ctx: Context<DepositSplAccounts>, input: DepositSplInput) -> Result<()> {
-        _deposit_spl(ctx, input)
-    }
+    // pub fn deposit_spl(ctx: Context<DepositSplAccounts>, input: DepositSplInput) -> Result<()> {
+    //     _deposit_spl(ctx, input)
+    // }
 
-    pub fn withdraw_spl(ctx: Context<WithdrawSplAccounts>, input: WithdrawSplInput) -> Result<()> {
-        _withdraw_spl(ctx, input)
-    }
+    // pub fn withdraw_spl(ctx: Context<WithdrawSplAccounts>, input: WithdrawSplInput) -> Result<()> {
+    //     _withdraw_spl(ctx, input)
+    // }
 
     pub fn close_account(ctx: Context<CloseAccounts>) -> Result<()> {
         _close_account(ctx)

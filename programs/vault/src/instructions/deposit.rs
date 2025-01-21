@@ -1,11 +1,21 @@
-use anchor_lang::prelude::*;
+use anchor_lang::{
+    prelude::*,
+    system_program::{transfer, Transfer},
+};
 
-use crate::{Vault, VAULT_SEED};
+use crate::{Vault, STATE_SEED, VAULT_SEED};
 
-pub fn _deposit(_ctx: Context<DepositAccounts>, _input: DepositInput) -> Result<()> {
+pub fn _deposit(ctx: Context<DepositAccounts>, input: DepositInput) -> Result<()> {
     msg!("Depositing SOL to vault");
 
-    Ok(())
+    let cpi_instruction = Transfer {
+        from: ctx.accounts.owner.to_account_info(),
+        to: ctx.accounts.vault.to_account_info(),
+    };
+    let cpi_program = ctx.accounts.system_program.to_account_info();
+    let cpi = CpiContext::new(cpi_program, cpi_instruction);
+
+    transfer(cpi, input.amount)
 }
 
 #[derive(Accounts)]
@@ -14,20 +24,16 @@ pub struct DepositAccounts<'info> {
     pub owner: Signer<'info>,
     #[account(
         mut,
-        owner = owner.key()
+        seeds = [STATE_SEED, owner.key().as_ref()],
+        bump = state.state_bump
     )]
-    pub vault_state: AccountInfo<'info>,
-    #[account(
-        seeds = [VAULT_SEED, vault_state.key().as_ref()],
-        bump = vault.auth_bump
-    )]
-    pub vault_auth: AccountInfo<'info>,
+    pub state: Account<'info, Vault>,
     #[account(
         mut,
-        seeds = [VAULT_SEED, vault_auth.key().as_ref()],
-        bump = vault.vault_bump
+        seeds = [VAULT_SEED, state.key().as_ref()],
+        bump = state.vault_bump
     )]
-    pub vault: Account<'info, Vault>,
+    pub vault: SystemAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
