@@ -1,14 +1,17 @@
 pub mod deposit;
 pub use deposit::*;
 
-pub mod hello;
-pub use hello::*;
+pub mod deposit_spl;
+pub use deposit_spl::*;
 
-pub mod open;
-pub use open::*;
+pub mod initialize;
+pub use initialize::*;
+
+pub mod withdraw_spl;
+pub use withdraw_spl::*;
 
 pub mod withdraw;
 pub use withdraw::*;
 
-pub mod close;
-pub use close::*;
+pub mod close_account;
+pub use close_account::*;

@@ -1,35 +1,8 @@
+use crate::{Vault, VAULT_SEED};
 use anchor_lang::prelude::*;
 
-use crate::{Vault, WithdrawErrors, VAULT_SEED};
-
-fn transfer_sol_to_depositor<'info>(
-    vault: &mut Account<'info, Vault>,
-    depositor: &Signer<'info>,
-    amount: u64,
-) -> Result<()> {
-    let vault_account_lamps = vault.get_lamports();
-
-    require!(
-        vault_account_lamps >= amount,
-        WithdrawErrors::InsufficientLamports
-    );
-
-    vault.sub_lamports(amount)?;
-    depositor.add_lamports(amount)?;
-
-    Ok(())
-}
-
-pub fn _withdraw(ctx: Context<WithdrawAccounts>, input: WithdrawInput) -> Result<()> {
-    let amount = input.amount;
-    let vault = &mut ctx.accounts.vault;
-
-    transfer_sol_to_depositor(vault, &ctx.accounts.payer, amount)?;
-
-    vault.balance = match vault.balance.checked_sub(amount) {
-        Some(value) => value,
-        None => return Err(WithdrawErrors::Overflow.into()),
-    };
+pub fn _withdraw(_ctx: Context<WithdrawAccounts>, _input: WithdrawInput) -> Result<()> {
+    msg!("Withdrawing SOL from vault");
 
     Ok(())
 }
@@ -37,14 +10,24 @@ pub fn _withdraw(ctx: Context<WithdrawAccounts>, input: WithdrawInput) -> Result
 #[derive(Accounts)]
 pub struct WithdrawAccounts<'info> {
     #[account(mut)]
-    pub payer: Signer<'info>,
+    pub owner: Signer<'info>,
     #[account(
         mut,
-        seeds = [VAULT_SEED, payer.key().as_ref()],
-        bump = vault.bump
+        owner = owner.key()
+    )]
+    pub vault_state: AccountInfo<'info>,
+    #[account(
+        seeds = [VAULT_SEED, vault_state.key().as_ref()],
+        bump = vault.auth_bump
+    )]
+    pub vault_auth: AccountInfo<'info>,
+    #[account(
+        mut,
+        seeds = [VAULT_SEED, vault_auth.key().as_ref()],
+        bump = vault.vault_bump
     )]
     pub vault: Account<'info, Vault>,
-    pub system_program: SystemAccount<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
