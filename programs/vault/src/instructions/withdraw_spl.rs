@@ -1,20 +1,27 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token_interface::{Mint, TokenAccount, TokenInterface},
+    token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
 };
 
-use crate::{Vault, VAULT_SEED};
+use crate::{Vault, STATE_SEED, VAULT_SEED};
 
-pub fn _withdraw_spl(_ctx: Context<WithdrawSplAccounts>, _input: WithdrawSplInput) -> Result<()> {
-    // let vault = &mut ctx.accounts.vault;
-    // vault.balance = vault.balance.checked_add(input.amount).unwrap();
+pub fn _withdraw_spl(ctx: Context<WithdrawSplAccounts>, input: WithdrawSplInput) -> Result<()> {
+    let from = ctx.accounts.vault_ata.to_account_info();
+    let to = ctx.accounts.owner_ata.to_account_info();
+    let mint = ctx.accounts.token_mint.to_account_info();
+    let decimals = ctx.accounts.token_mint.decimals;
 
-    // transfer_sol_to_vault(&ctx, &input)?;
+    let cpi_accounts = TransferChecked {
+        authority: ctx.accounts.vault.to_account_info(),
+        from,
+        to,
+        mint,
+    };
+    let cpi_program = ctx.accounts.token_program.to_account_info();
+    let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
 
-    msg!("Withdrawing SPL from vault");
-
-    Ok(())
+    transfer_checked(cpi_context, input.amount, decimals)
 }
 
 #[derive(Accounts)]
@@ -29,24 +36,20 @@ pub struct WithdrawSplAccounts<'info> {
     )]
     pub owner_ata: InterfaceAccount<'info, TokenAccount>,
     #[account(
+        seeds = [STATE_SEED, owner.key().as_ref()],
+        bump = state.state_bump
+    )]
+    pub state: Account<'info, Vault>,
+    #[account(
         mut,
-        owner = owner.key()
+        seeds = [VAULT_SEED, state.key().as_ref()],
+        bump = state.vault_bump
     )]
-    pub vault_state: AccountInfo<'info>,
-    #[account(
-        seeds = [VAULT_SEED, vault_state.key().as_ref()],
-        bump = vault.auth_bump
-    )]
-    pub vault_auth: AccountInfo<'info>,
-    #[account(
-        seeds = [VAULT_SEED, vault_auth.key().as_ref()],
-        bump = vault.vault_bump
-    )]
-    pub vault: Account<'info, Vault>,
+    pub vault: SystemAccount<'info>,
     #[account(
         mut,
         associated_token::mint = token_mint,
-        associated_token::authority = vault_auth,
+        associated_token::authority = vault,
         associated_token::token_program = token_program
     )]
     pub vault_ata: InterfaceAccount<'info, TokenAccount>,
