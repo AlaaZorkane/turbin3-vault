@@ -13,5 +13,5 @@ pub use withdraw_spl::*;
 pub mod withdraw;
 pub use withdraw::*;
 
-pub mod close_account;
-pub use close_account::*;
+pub mod close;
+pub use close::*;

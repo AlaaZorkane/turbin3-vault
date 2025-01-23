@@ -5,7 +5,7 @@ use anchor_lang::{
 
 use crate::{Vault, STATE_SEED, VAULT_SEED};
 
-pub fn _close_account(ctx: Context<CloseAccounts>) -> Result<()> {
+pub fn _close(ctx: Context<CloseAccounts>) -> Result<()> {
     msg!("Closing account");
 
     let cpi_instruction = Transfer {

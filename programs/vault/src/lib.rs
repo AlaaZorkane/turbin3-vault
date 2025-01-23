@@ -37,7 +37,7 @@ pub mod vault {
         _withdraw_spl(ctx, input)
     }
 
-    pub fn close_account(ctx: Context<CloseAccounts>) -> Result<()> {
-        _close_account(ctx)
+    pub fn close(ctx: Context<CloseAccounts>) -> Result<()> {
+        _close(ctx)
     }
 }
